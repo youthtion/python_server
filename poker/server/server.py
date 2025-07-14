@@ -2,7 +2,7 @@ from flask import Flask, request, jsonify, send_from_directory
 from enum import Enum, IntEnum
 import random
 import threading
-app = Flask(__name__)
+app = Flask(__name__, static_folder="../client")
 
 RANKS = 13
 
@@ -135,10 +135,6 @@ def change():
             Game[game_id]["status"] = EStatus.COMPARE
         return jsonify({"hand": new_hand})
 
-@app.route("/")
-def serveIndex():
-    return send_from_directory("../client/", "index.html")
-
 def encodeHand(_cards):
     hand = [0 for _ in range(len(ESuit))]
     for card in _cards:
@@ -222,6 +218,14 @@ def compare_hands(handA, handB):
     if evaA["main"] != evaB["main"]:
         return evaA["main"] - evaB["main"]
     return evaA["main_suit"] - evaB["main_suit"]
+
+@app.route("/")
+def serve_index():
+    return send_from_directory(app.static_folder, "index.html")
+
+@app.route("/<path:path>")
+def serve_static(path):
+    return send_from_directory(app.static_folder, path)
 
 if __name__ == "__main__":
     app.run(debug = True, port = 8000)
